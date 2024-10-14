@@ -90,8 +90,10 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- [[ Set guifont ]]
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,7 +104,16 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
+
+-- Disable auto word wrap
+vim.opt.wrap = false
+
+-- Default text width
+vim.opt.textwidth = 88
+
+-- Show guide lines
+vim.opt.colorcolumn = { 72, 80, 88, 100, 120 }
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -146,7 +157,32 @@ vim.opt.splitbelow = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+--[[
+vim.opt.listchars = {
+  concealed = '*',
+  eol = '¶',
+  extends = '▶',
+  lead = '·',
+  leadmultispace = '>',
+  multispace = '···+',
+  nbsp = '␣',
+  precedes = '◀',
+  space = '·',
+  tab = '>-',
+  trail = '·'
+}
+]]
+vim.opt.listchars = {
+  -- concealed = '*',
+  eol = '¶',
+  extends = '▶',
+  nbsp = '␣',
+  precedes = '◀',
+  space = '·',
+  tab = '>-',
+  trail = '·',
+}
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -156,6 +192,34 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+
+--[[ Settings for Editor navigation ]]
+-- Navigation over line start, ending
+vim.opt.whichwrap:append 'h,l'
+vim.opt.whichwrap:append '<,>,[,]'
+
+-- Delete over line start, ending
+vim.opt.backspace = { 'indent', 'eol', 'start' }
+
+-- [[ Enable code folding ]]
+vim.opt.foldlevel = 20
+vim.opt.foldmethod = 'expr'
+vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
+-- vim.opt.foldnestmax = 10
+-- vim.opt.foldlevelstart = 99
+-- vim.opt.nofoldenable = false
+
+-- [[ Shell Settings ]]
+--  See `:help 'shell'`
+-- vim.opt.shell = '"C:\\WINDOWS\\system32\\cmd.exe"'
+-- vim.opt.shell = '/usr/bin/bash'
+if vim.opt.shell == '/usr/bin/bash' then
+  vim.opt.shellcmdflag = '-c'
+  --  See `:help 'shellquote'`
+  vim.opt.shellquote = '"'
+  vim.opt.shellxquote = '('
+  vim.opt.shellslash = true
+end
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -237,6 +301,11 @@ require('lazy').setup({
   --
   -- Use `opts = {}` to force a plugin to be loaded.
   --
+  --  This is equivalent to:
+  --    require('Comment').setup({})
+
+  -- "gc" to comment visual regions/lines
+  -- { 'numToStr/Comment.nvim',    opts = {} },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -543,6 +612,10 @@ require('lazy').setup({
           -- or a suggestion from your LSP for this to activate.
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
+          -- Opens a popup that displays documentation about the word under your cursor
+          --  See `:help K` for why this keymap.
+          map('K', vim.lsp.buf.hover, 'Hover Documentation')
+
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header.
           map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -700,10 +773,10 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'black' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettierd', 'prettier', stop_after_first = true },
       },
     },
   },
@@ -824,6 +897,8 @@ require('lazy').setup({
     end,
   },
 
+  -- [[ Setting colorscheme ]]
+  --[[
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
@@ -841,9 +916,61 @@ require('lazy').setup({
       vim.cmd.hi 'Comment gui=none'
     end,
   },
+--[[ ]]
 
+--[[ ]]
+  {
+    'oxfist/night-owl.nvim',
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    priority = 1000, -- make sure to load this before all the other start plugins
+    config = function()
+      require('night-owl').setup {
+        italics = false, -- i don't like cursive text, it makes some text hard to read
+        transparent_background = true, -- checking if this makes any sense
+      }
+      -- Load the colorscheme here
+      vim.cmd.colorscheme 'night-owl'
+      -- You can configure highlights by doing something like
+      vim.cmd.hi 'ColorColumn ctermbg=darkred ctermfg=lightgrey guibg=darkred guifg=lightgrey'
+      vim.cmd.hi 'CursorLine ctermbg=darkblue ctermfg=lightgrey guibg=darkblue guifg=lightgrey'
+      --   vim.cmd.hi 'CursorColumn ctermbg=darkblue ctermfg=lightgrey guibg=darkblue guifg=lightgrey'
+      vim.cmd.hi 'Comment gui=none'
+    end,
+  },
+-- ]]
+
+  -- Code Folding
+  --[[
+  {
+    'anuvyklack/pretty-fold.nvim',
+    config = function()
+      require('pretty-fold').setup {
+        keep_indentation = false,
+        fill_char = '•',
+        sections = {
+          left = {
+            '+',
+            function()
+              return string.rep('-', vim.v.foldlevel)
+            end,
+            ' ',
+            'number_of_folded_lines',
+            ':',
+            'content',
+          },
+        },
+      }
+    end,
+  },
+  ]]
+  
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    'folke/todo-comments.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    opts = { signs = false },
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -888,7 +1015,20 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'diff',
+        'go',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc'
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -917,19 +1057,19 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
