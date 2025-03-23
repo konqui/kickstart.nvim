@@ -1178,6 +1178,23 @@ require('lazy').setup(
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     },
 
+    -- Add go support
+    {
+      "ray-x/go.nvim",
+      -- optional packages
+      dependencies = {
+        "ray-x/guihua.lua",
+        "neovim/nvim-lspconfig",
+        "nvim-treesitter/nvim-treesitter",
+      },
+      event = {"CmdlineEnter"},
+      ft = {"go", 'gomod'},
+      build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+      config = function()
+        require("go").setup()
+      end,
+    }
+
     -- NOTE: CURRENTLY ONLY FOR TESTING MAY REMOVE LATER
     -- [[ GITHUB COPILOT - is needed later as fallback for avante ]]
     {
