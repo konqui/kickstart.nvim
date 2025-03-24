@@ -279,10 +279,18 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, {
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
-vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+vim.keymap.set('n', '<left>',  '<cmd>echo "Use h to move!!"<CR>')
 vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
-vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
-vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+vim.keymap.set('n', '<up>',    '<cmd>echo "Use k to move!!"<CR>')
+vim.keymap.set('n', '<down>',  '<cmd>echo "Use j to move!!"<CR>')
+
+-- use tab to iindent
+vim.keymap.set('n', '<Tab>', '>>')
+vim.keymap.set('i', '<Tab>', '<C-t>')
+
+-- use shift-tab to unindent
+vim.keymap.set('n', '<S-Tab>', '<<')
+vim.keymap.set('i', '<S-Tab>', '<C-d>')
 
 -- Keybinds to make split navigation easier.
 -- Use CTRL+<hjkl> to switch between windows
@@ -352,7 +360,7 @@ require('lazy').setup(
     --    require('Comment').setup({})
 
     -- "gc" to comment visual regions/lines
-    -- { 'numToStr/Comment.nvim',    opts = {} },
+    { 'numToStr/Comment.nvim',    opts = {} },
 
     -- Alternatively, use `config = function() ... end` for full control over the configuration.
     -- If you prefer to call `setup` explicitly, use:
@@ -510,12 +518,12 @@ require('lazy').setup(
           -- You can put your default mappings / updates / etc. in here
           --  All the info you're looking for is in `:help telescope.setup()`
           --
-          -- defaults = {
-          --   mappings = {
-          --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-          --   },
-          -- },
-          -- pickers = {}
+          defaults = {
+            mappings = {
+              i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+            },
+          },
+          pickers = {},
           extensions = {
             ['ui-select'] = {
               require('telescope.themes').get_dropdown(),
@@ -556,10 +564,10 @@ require('lazy').setup(
         -- It's also possible to pass additional configuration options.
         --  See `:help telescope.builtin.live_grep()` for information about particular keys
         vim.keymap.set('n', '<leader>s/', function()
-          builtin.live_grep {
-            grep_open_files = true,
-            prompt_title = 'Live Grep in Open Files',
-          }
+            builtin.live_grep {
+              grep_open_files = true,
+              prompt_title = 'Live Grep in Open Files',
+            }
         end, { desc = '[S]earch [/] in Open Files' })
 
         -- Shortcut for searching your Neovim configuration files
@@ -795,22 +803,37 @@ require('lazy').setup(
         --        For example, to see the options for `lua_ls`,
         --        you could go to: https://luals.github.io/wiki/settings/
         local servers = {
-          -- clangd = {},
-          -- gopls = {},
-          -- pyright = {},
-          -- rust_analyzer = {},
-          -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-          --
-          -- Some languages (like typescript) have entire language plugins that can be useful:
-          --    https://github.com/pmizio/typescript-tools.nvim
-          --
-          -- But for many setups, the LSP (`ts_ls`) will work just fine
-          -- ts_ls = {},
-          --
+          clangd = {},
+          -- clangd = {
+          --   cmd = { "clangd" },
+          --   filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+          --   capabilities = {
+          --     offsetEncoding = { "utf-8", "utf-16" },
+          --     textDocument = {
+          --       completion = {
+          --         editsNearCursor = true
+          --       },
+          --     },
+          --   },
+          -- },
+
+          gopls = {},
+          -- gopls = {
+          --   cmd = { "gopls" },
+          --   filetypes = { "go", "gomod", "gowork", "gotmpl" },
+          -- },
+
+          jsonls = {},
+          -- jsonls = {
+          --   cmd = { "vscode-json-language-server", "--stdio" },
+          --   filetypes = { "json", "jsonc" },
+          --   init_options = { provideFormatter = true },
+          -- },
 
           lua_ls = {
-            -- cmd = { ... },
-            -- filetypes = { ... },
+            -- cmd = { "lua-language-server" },
+            -- filetypes = { "lua" },
+            -- log_level = 2, 
             -- capabilities = {},
             settings = {
               Lua = {
@@ -822,6 +845,107 @@ require('lazy').setup(
               },
             },
           },
+
+          omnisharp = {},
+          -- omnisharp = {
+          --   cmd = { "dotnet", "/path/to/omnisharp/OmniSharp.dll" },,
+          --   filetypes = { "cs", "vb" },
+          --   init_options = {},
+          --   settings = {
+          --     FormattingOptions = {
+          --       EnableEditorConfigSupport = true,
+          --     },
+          --     MsBuild = {},
+          --     RoslynExtensionsOptions = {},
+          --     Sdk = {
+          --       IncludePrereleases = true,
+          --     },
+          --   },
+          -- },
+
+          -- perlls = {},
+          -- perlls = {
+          --   cmd = { "perl", "-MPerl::LanguageServer", "-e", "Perl::LanguageServer::run", "--", "--port 13603", "--nostdio 0" },
+          --   filetypes = { "perl" },
+          --   settings = {
+          --     perl = {
+          --       fileFilter = { ".pm", ".pl" },
+          --       ignoreDirs = ".git",
+          --       perlCmd = "perl",
+          --       perlInc = " ",
+          --     },
+          --   },
+          -- },
+
+          -- perlpls = {},
+          -- perlpls = {
+          --   cmd = { "pls" },
+          --   filetypes = { "perl" },
+          --   settings = {
+          --     perl = {
+          --       perlcritic = {
+          --         enabled = false,
+          --       },
+          --       syntax = {
+          --         enabled = true,
+          --       },
+          --     },
+          --   },
+          -- },
+
+          -- phan = {},
+          -- phan = {
+          --   cmd = { "phan", "-m", "json", "--no-color", "--no-progress-bar", "-x", "-u", "-S", "--language-server-on-stdin", "--allow-polyfill-parser" },
+          --   filetypes = { "php" },
+          -- },
+
+          phpactor = {},
+          -- phpactor = {
+          --   cmd = { "phpactor", "language-server" },
+          --   filetypes = { "php" },
+          -- },
+
+          -- postgres_lsp = {},
+          -- postgres_lsp = {
+          --   cmd = { "postgrestools", "lsp-proxy" },
+          --   filetypes = { "sql" },
+          -- },
+
+          pyright = {},
+          -- pyright = {
+          --   cmd = { "pyright-langserver", "--stdio" },
+          --   filetypes = { "python" },
+          --   settings = {
+          --     python = {
+          --       analysis = {
+          --         autoSearchPaths = true,
+          --         diagnosticMode = "openFilesOnly",
+          --         useLibraryCodeForTypes = true
+          --       },
+          --     },
+          --   },
+          -- },
+
+          rust_analyzer = {},
+          -- rust_analyzer = {
+          --   cmd = { "rust-analyzer" },
+          --   filetypes = { "rust" },
+          -- },
+
+          sqlls = {},
+          -- sqlls = {
+          --   cmd = { "sql-language-server", "up", "--method", "stdio" },
+          --   filetypes = { "sql", "mysql" },
+          --   settings = {},
+          -- },
+
+          -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
+          --
+          -- Some languages (like typescript) have entire language plugins that can be useful:
+          --    https://github.com/pmizio/typescript-tools.nvim
+          --
+          -- But for many setups, the LSP (`ts_ls`) will work just fine
+          ts_ls = {},
         }
 
         -- Ensure the servers and tools above are installed
@@ -1024,30 +1148,31 @@ require('lazy').setup(
     },
 
     -- [[ Setting colorscheme ]]
-    --[[
-  { -- You can easily change to a different colorscheme.
+    -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed,
     --  you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
+    --[[
+    {
+      'folke/tokyonight.nvim',
+      priority = 1000, -- Make sure to load this before all the other start plugins.
+      config = function()
+        ---@diagnostic disable-next-line: missing-fields
+        require('tokyonight').setup {
+          styles = {
+            comments = { italic = false }, -- Disable italics in comments
+          },
+        }
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-    end,
-  },
---]]
+        -- Load the colorscheme here.
+        -- Like many other themes, this one has different styles, and you could load
+        -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+        vim.cmd.colorscheme 'tokyonight-night'
+      end,
+    },
+    --]]
 
     {
       'oxfist/night-owl.nvim',
@@ -1055,7 +1180,7 @@ require('lazy').setup(
       priority = 1000, -- make sure to load this before all the other start plugins
       config = function()
         require('night-owl').setup {
-          italics = false, -- i don't like cursive text, it makes some text hard to read
+          italics = false, -- i do not like cursive text, it makes some text hard to read
           transparent_background = true, -- checking if this makes any sense
         }
         -- Load the colorscheme here
@@ -1143,21 +1268,52 @@ require('lazy').setup(
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
       opts = {
         ensure_installed = {
+          'awk',
           'bash',
           'c',
+          'c_sharp',
+          'cpp',
+          'css',
+          'csv',
           'diff',
-          'gitcommit',
+          'dockerfile',
+          'git_config',
           'git_rebase',
+          'gitattributes',
+          'gitcommit',
+          'gitignore',
           'go',
+          'gomod',
           'html',
+          'http',
+          'ini',
+          'java',
+          'javadoc',
+          'javascript',
+          'jq',
+          'json',
+          'jsonc',
           'lua',
           'luadoc',
+          'make',
           'markdown',
           'markdown_inline',
+          'perl',
+          'php',
+          'phpdoc',
+          'powershell',
+          'python',
           'query',
+          'regex',
+          'ruby',
           'rust',
+          'sql',
+          'toml',
+          'typescript',
           'vim',
           'vimdoc',
+          'xml',
+          'yaml',
         },
         -- Autoinstall languages that are not installed
         auto_install = true,
@@ -1178,7 +1334,7 @@ require('lazy').setup(
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     },
 
-    -- Add go support
+    -- Add go tools support
     {
       "ray-x/go.nvim",
       -- optional packages
@@ -1189,11 +1345,11 @@ require('lazy').setup(
       },
       event = {"CmdlineEnter"},
       ft = {"go", 'gomod'},
-      build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+      build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
       config = function()
         require("go").setup()
       end,
-    }
+    },
 
     -- NOTE: CURRENTLY ONLY FOR TESTING MAY REMOVE LATER
     -- [[ GITHUB COPILOT - is needed later as fallback for avante ]]
@@ -1202,7 +1358,7 @@ require('lazy').setup(
       cmd = 'Copilot',
       event = 'InsertEnter',
       config = function()
-        require('copilot').setup {}
+        require('copilot').setup()
       end,
     },
 
