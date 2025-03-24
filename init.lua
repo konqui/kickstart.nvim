@@ -184,31 +184,17 @@ vim.opt.splitbelow = true
 --  and `:help 'listchars'`
 vim.opt.list = true
 -- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
---[[
 vim.opt.listchars = {
   eol = '¶',
   extends = '▶',
-  lead = '·',
-  leadmultispace = '>',
-  multispace = '···+',
-  nbsp = '␣',
-  precedes = '◀',
-  space = '·',
-  tab = '>-',
-  trail = '·'
-}
---]]
-vim.opt.listchars = {
-  eol = '¶',
-  extends = '>',
   lead = ' ',
   --leadmultispace = '···|',
-  multispace = '•',
+  multispace = '••',
   nbsp = '␣',
-  precedes = '<',
+  precedes = '◀',
   space = ' ',
   tab = '» ',
-  trail = '·',
+  trail = '•',
 }
 
 -- Preview substitutions live, as you type!
@@ -220,20 +206,21 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
--- Set whichwrap keys
-vim.opt.whichwrap = '<>[],b,s'
-
--- Set backspace
--- vim.opt.backspace = { 'indent', 'eol', 'start' } -- this should already be the default
-
 --[[ Settings for Editor navigation ]]
 -- Navigation over line start, ending
 -- Set whichwrap keys
 --vim.opt.whichwrap = '<,>,[,],h,l,b,s'
 vim.opt.whichwrap = '<,>,[,],b,s'
 
--- Delete over line start, ending
+-- Set backspace to work like in normal editors, aka:
+--  Delete over line start, ending
 vim.opt.backspace = { 'indent', 'eol', 'start' }
+
+-- Backspace can erase tabs and spaces
+vim.opt.softtabstop = 4
+
+-- Do not wrap lines. Allow long lines to extend as far as the line goes
+vim.opt.nowrap = true
 
 -- [[ Enable code folding ]]
 vim.opt.foldlevel = 20
@@ -284,13 +271,17 @@ vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 vim.keymap.set('n', '<up>',    '<cmd>echo "Use k to move!!"<CR>')
 vim.keymap.set('n', '<down>',  '<cmd>echo "Use j to move!!"<CR>')
 
--- use tab to iindent
+-- Use tab to indent
 vim.keymap.set('n', '<Tab>', '>>')
 vim.keymap.set('i', '<Tab>', '<C-t>')
 
--- use shift-tab to unindent
+-- Use shift-tab to unindent
 vim.keymap.set('n', '<S-Tab>', '<<')
 vim.keymap.set('i', '<S-Tab>', '<C-d>')
+
+-- Since·we·use·expandtab·as·a·default
+--  We·need·to·add·a·fallback·for·inserting·a·actual·<tab>¶
+vim.keymap.set('i', '<A-S-Tab>', '<C-v><Tab>')
 
 -- Keybinds to make split navigation easier.
 -- Use CTRL+<hjkl> to switch between windows
@@ -1174,6 +1165,7 @@ require('lazy').setup(
     },
     --]]
 
+    
     {
       'oxfist/night-owl.nvim',
       lazy = false, -- make sure we load this during startup if it is your main colorscheme
