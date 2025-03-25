@@ -220,7 +220,7 @@ vim.opt.backspace = { 'indent', 'eol', 'start' }
 vim.opt.softtabstop = 4
 
 -- Do not wrap lines. Allow long lines to extend as far as the line goes
-vim.opt.nowrap = true
+vim.opt.wrap = false
 
 -- [[ Enable code folding ]]
 vim.opt.foldlevel = 20
