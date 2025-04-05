@@ -90,6 +90,9 @@ local shell = os.getenv 'SHELL'
 local comspec = os.getenv 'COMSPEC'
 local nvim_shell = os.getenv 'NVIM_SHELL'
 
+-- [[ Disable Perl Provider (it is broken) ]]
+vim.g.loaded_perl_provider = 0
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
