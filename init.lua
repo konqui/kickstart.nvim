@@ -90,6 +90,9 @@ local shell = os.getenv 'SHELL'
 local comspec = os.getenv 'COMSPEC'
 local nvim_shell = os.getenv 'NVIM_SHELL'
 
+-- [[ Disable Perl Provider (it is broken) ]]
+vim.g.loaded_perl_provider = 0
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -217,13 +220,13 @@ vim.opt.wrap = false
 -- See `:help 'shell'`
 -- vim.opt.shell = '"C:\\WINDOWS\\system32\\cmd.exe"'
 -- vim.opt.shell = '/usr/bin/bash'
---if vim.opt.shell == '/usr/bin/bash.exe' then
---  vim.opt.shellcmdflag = '-c'
---  -- See `:help 'shellquote'`
---  vim.opt.shellquote = '"'
---  vim.opt.shellxquote = '('
---  vim.opt.shellslash = true
---end
+if vim.opt.shell == '/usr/bin/bash.exe' then
+  vim.opt.shellcmdflag = '-c'
+  -- See `:help 'shellquote'`
+  vim.opt.shellquote = '"'
+  vim.opt.shellxquote = '('
+  vim.opt.shellslash = true
+end
 
 -- [[ Specific vscode settings ]]
 -- if vim.g.vscode then
@@ -453,7 +456,7 @@ require('lazy').setup({
 
         -- `build` is used to run some command when the plugin is installed/updated.
         -- This is only run then, not every time Neovim starts up.
-        build = 'make',
+        build = "make",
 
         -- `cond` is a condition used to determine whether this plugin should be
         -- installed and loaded.
