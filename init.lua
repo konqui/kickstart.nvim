@@ -218,14 +218,16 @@ vim.opt.wrap = false
 
 -- [[ Shell Settings ]]
 -- See `:help 'shell'`
--- vim.opt.shell = '"C:\\WINDOWS\\system32\\cmd.exe"'
--- vim.opt.shell = '/usr/bin/bash'
-if vim.opt.shell == '/usr/bin/bash.exe' then
-  vim.opt.shellcmdflag = '-c'
-  -- See `:help 'shellquote'`
-  vim.opt.shellquote = '"'
-  vim.opt.shellxquote = '('
-  vim.opt.shellslash = true
+if (os.getenv("SHELL") and os.getenv("SHELL"):find("bash")) then
+    --Configuring gitbash as THE shell
+    vim.o.shell = [["C:/Program Files/Git/usr/bin/bash.exe"]]
+    vim.o.shellcmdflag = "-c"
+    vim.o.shellredir = ">%s 2>&1"
+    vim.o.shellquote = ""
+    vim.o.shellxescape = ""
+    vim.env.TMP = "/tmp"
+    vim.o.shellxquote = ""
+    vim.o.shellpipe = "2>&1| tee"
 end
 
 -- [[ Specific vscode settings ]]
