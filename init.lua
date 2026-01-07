@@ -84,6 +84,9 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- temp added
+vim.cmd [[let g:ts_verbose = 1]]
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -91,7 +94,19 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
+
+-- Enable char replacements - for terminals that do not support font ligatures
+--vim.opt.conceallevel = 2
+--vim.opt.concealcursor = "nc"
+--vim.cmd [[
+--  syntax match Operator "===" conceal cchar=≡
+--  syntax match Operator "!==" conceal cchar=≢
+--  syntax match Operator ">="  conceal cchar=≥
+--  syntax match Operator "<="  conceal cchar=≤
+--  syntax match Operator "!="  conceal cchar=≠
+--  syntax match Operator "<>"  conceal cchar=≠
+--]]
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -102,13 +117,24 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
 vim.o.showmode = false
+
+-- [[ Avante Specific Settings ]]
+-- views can only be fully collapsed with the global statusline
+vim.opt.laststatus = 3
+
+-- Enable true colors / 24bit colors for terminal
+-- NOTE: terminal uses gui colors for highlight also
+vim.opt.termguicolors = true
+
+-- Set default colorscheme, so we have a fallback
+vim.cmd.colorscheme = slate
 
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
@@ -118,7 +144,10 @@ vim.schedule(function()
   vim.o.clipboard = 'unnamedplus'
 end)
 
--- Enable break indent
+-- Do not linewrap per default
+vim.o.wrap = false
+
+-- Enable break indent -- Note: this actually applies if wrap is set to true
 vim.o.breakindent = true
 
 -- Save undo history
@@ -141,6 +170,19 @@ vim.o.timeoutlen = 300
 vim.o.splitright = true
 vim.o.splitbelow = true
 
+-- Default text width
+vim.opt.textwidth = 88
+
+-- Show guide lines
+vim.opt.colorcolumn = { 72, 80, 88, 100, 120 }
+
+-- Enable left/right motion to wrap across lines in Normal, Visual and Insert mode
+-- vim.o.whichwrap = vim.o.whichwrap .. '<,>,[,],h,l,b,s'
+vim.o.whichwrap = vim.o.whichwrap .. '<,>,[,],b,s'
+
+-- Allow backsace to delete tabs and spaces
+vim.opt.softtabstop = 4
+
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
@@ -150,13 +192,30 @@ vim.o.splitbelow = true
 --   See `:help lua-options`
 --   and `:help lua-options-guide`
 vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = {
+  eol = '¶',
+  extends = '▶',
+  lead = ' ',
+  --leadmultispace = '·|',
+  multispace = '••',
+  nbsp = '␣',
+  precedes = '◀',
+  space = ' ',
+  tab = '» ',
+  trail = '•',
+}
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
 
 -- Show which line your cursor is on
 vim.o.cursorline = true
+vim.cmd.hi 'CursorLine gui=underline guibg=NONE guifg=NONE cterm=NONE ctermfg=white ctermbg=darkblue'
+
+-- Show which column cursor is on
+vim.o.cursorcolumn = true
+vim.cmd.hi 'CursorColumn gui=NONE guibg=NONE guifg=NONE cterm=NONE ctermfg=white ctermbg=darkblue'
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
@@ -185,10 +244,10 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -224,7 +283,15 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
-  local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
+  local out = vim.fn.system {
+    'git',
+    'clone',
+    '--filter=blob:none',
+    '--branch=stable',
+    lazyrepo,
+    lazypath,
+  }
+
   if vim.v.shell_error ~= 0 then
     error('Error cloning lazy.nvim:\n' .. out)
   end
@@ -279,7 +346,7 @@ require('lazy').setup({
         change = { text = '~' },
         delete = { text = '_' },
         topdelete = { text = '‾' },
-        changedelete = { text = '~' },
+        changedelete = { text = '!' },
       },
     },
   },
@@ -670,18 +737,19 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      --[[
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        clangd = {},
+        gopls = {},
+        pyright = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
         --
 
         lua_ls = {
@@ -698,6 +766,147 @@ require('lazy').setup({
             },
           },
         },
+      }
+      --[[]]
+
+      local servers = {
+        clangd = {},
+        -- clangd = {
+        --   cmd = { "clangd" },
+        --   filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+        --   capabilities = {
+        --     offsetEncoding = { "utf-8", "utf-16" },
+        --     textDocument = {
+        --       completion = {
+        --         editsNearCursor = true
+        --       },
+        --     },
+        --   },
+        -- },
+
+        gopls = {},
+        -- gopls = {
+        --   cmd = { "gopls" },
+        --   filetypes = { "go", "gomod", "gowork", "gotmpl" },
+        -- },
+
+        jsonls = {},
+        -- jsonls = {
+        --   cmd = { "vscode-json-language-server", "--stdio" },
+        --   filetypes = { "json", "jsonc" },
+        --   init_options = { provideFormatter = true },
+        -- },
+
+        lua_ls = {
+          -- cmd = { "lua-language-server" },
+          -- filetypes = { "lua" },
+          -- log_level = 2,
+          -- capabilities = {},
+          settings = {
+            Lua = {
+              completion = {
+                callSnippet = 'Replace',
+              },
+              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+              -- diagnostics = { disable = { 'missing-fields' } },
+            },
+          },
+        },
+
+        omnisharp = {},
+        -- omnisharp = {
+        --   cmd = { "dotnet", "/path/to/omnisharp/OmniSharp.dll" },,
+        --   filetypes = { "cs", "vb" },
+        --   init_options = {},
+        --   settings = {
+        --     FormattingOptions = {
+        --       EnableEditorConfigSupport = true,
+        --     },
+        --     MsBuild = {},
+        --     RoslynExtensionsOptions = {},
+        --     Sdk = {
+        --       IncludePrereleases = true,
+        --     },
+        --   },
+        -- },
+
+        -- perlls = {},
+        -- perlls = {
+        --   cmd = { "perl", "-MPerl::LanguageServer", "-e", "Perl::LanguageServer::run", "--", "--port 13603", "--nostdio 0" },
+        --   filetypes = { "perl" },
+        --   settings = {
+        --     perl = {
+        --       fileFilter = { ".pm", ".pl" },
+        --       ignoreDirs = ".git",
+        --       perlCmd = "perl",
+        --       perlInc = " ",
+        --     },
+        --   },
+        -- },
+
+        -- perlpls = {},
+        -- perlpls = {
+        --   cmd = { "pls" },
+        --   filetypes = { "perl" },
+        --   settings = {
+        --     perl = {
+        --       perlcritic = {
+        --         enabled = false,
+        --       },
+        --       syntax = {
+        --         enabled = true,
+        --       },
+        --     },
+        --   },
+        -- },
+
+        -- phan = {},
+        -- phan = {
+        --   cmd = { "phan", "-m", "json", "--no-color", "--no-progress-bar", "-x", "-u", "-S", "--language-server-on-stdin", "--allow-polyfill-parser" },
+        --   filetypes = { "php" },
+        -- },
+
+        phpactor = {},
+        -- phpactor = {
+        --   cmd = { "phpactor", "language-server" },
+        --   filetypes = { "php" },
+        -- },
+
+        -- postgres_lsp = {},
+        -- postgres_lsp = {
+        --   cmd = { "postgrestools", "lsp-proxy" },
+        --   filetypes = { "sql" },
+        -- },
+
+        pyright = {},
+        -- pyright = {
+        --   cmd = { "pyright-langserver", "--stdio" },
+        --   filetypes = { "python" },
+        --   settings = {
+        --     python = {
+        --       analysis = {
+        --         autoSearchPaths = true,
+        --         diagnosticMode = "openFilesOnly",
+        --         useLibraryCodeForTypes = true
+        --       },
+        --     },
+        --   },
+        -- },
+
+        rust_analyzer = {},
+        -- rust_analyzer = {
+        --   cmd = { "rust-analyzer" },
+        --   filetypes = { "rust" },
+        -- },
+
+        sqlls = {},
+        -- sqlls = {
+        --   cmd = { "sql-language-server", "up", "--method", "stdio" },
+        --   filetypes = { "sql", "mysql" },
+        --   settings = {},
+        -- },
+
+        ts_ls = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -769,10 +978,10 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'black' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettierd', 'prettier', stop_after_first = true },
       },
     },
   },
@@ -799,12 +1008,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
         opts = {},
       },
@@ -876,30 +1085,56 @@ require('lazy').setup({
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+  --{ -- You can easily change to a different colorscheme.
+  --  -- Change the name of the colorscheme plugin below, and then
+  --  -- change the command in the config to whatever the name of that colorscheme is.
+  --  --
+  --  -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  --  'folke/tokyonight.nvim',
+  --  priority = 1000, -- Make sure to load this before all the other start plugins.
+  --  config = function()
+  --    ---@diagnostic disable-next-line: missing-fields
+  --    require('tokyonight').setup {
+  --      styles = {
+  --        comments = { italic = false }, -- Disable italics in comments
+  --      },
+  --    }
+  --
+  --    -- Load the colorscheme here.
+  --    -- Like many other themes, this one has different styles, and you could load
+  --    -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+  --    vim.cmd.colorscheme 'tokyonight-night'
+  --  end,
+  --},
+
+  -- A more usefull default color theme
+  --[[
+  {
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
+      require('catppuccin').setup {
+        flavour = 'macchiato',
+        -- transparent_background = true,
         styles = {
-          comments = { italic = false }, -- Disable italics in comments
+          comments = {}, -- disable italic comments
         },
+        term_colors = true,
       }
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'catppuccin'
     end,
   },
+  --[[]]
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    'folke/todo-comments.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    opts = { signs = false },
+  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -941,10 +1176,43 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    main = 'nvim-treesitter.config', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      -- ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'css',
+        --'csv',
+        'diff',
+        --'dtd',
+        'go',
+        --'gpg',
+        'html',
+        'json',
+        'lua',
+        'luadoc',
+        'make',
+        'markdown',
+        'markdown_inline',
+        'objc',
+        'php',
+        'python',
+        'properties',
+        --'query',
+        --'readline',
+        'regex',
+        --'requirements',
+        'rust',
+        --'ssh_config',
+        'toml',
+        'typescript',
+        'vim',
+        'xml',
+        'yml',
+        'zig',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -973,18 +1241,18 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
